@@ -180,6 +180,11 @@ module.exports = function (grunt) {
    * Init a browser
    */
   function initBrowser(browserOpts, opts, mode, fileGroup, cb) {
+    var map = {
+      'selenium': 'SeleniumGrid',
+      'saucelabs': 'Sauce Labs'
+    };
+
     var funcName = opts.usePromises ? 'promiseChainRemote': 'remote';
     var browser = wd[funcName](extractConnectionInfo(opts));
     browser.browserTitle = browserOpts.browserTitle;
@@ -201,10 +206,11 @@ module.exports = function (grunt) {
 
     browser.init(browserOpts, function (err) {
       if (err) {
+        var url = mode === 'selenium' ? opts.hostname : 'saucelabs.com/platforms';
         grunt.log.error(err);
         grunt.log.error('Could not initialize browser - ' + mode);
-        grunt.log.error('Make sure Sauce Labs supports the following browser/platform combo' +
-                        ' on ' + color('bright yellow', 'saucelabs.com/platforms') + ': ' + browserOpts.browserTitle);
+        grunt.log.error('Make sure ' + map[mode] +' supports the following browser/platform combo' +
+                        ' on ' + color('bright yellow', url) + ': ' + browserOpts.browserTitle);
         return cb(false);
       }
       runTestsForBrowser(opts, fileGroup, browser, cb);
